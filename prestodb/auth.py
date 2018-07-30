@@ -89,3 +89,34 @@ class KerberosAuthentication(Authentication):
 
     def handle_error(self, handle_error):
         pass
+
+
+class TLSAuthentication(Authentication):
+    """
+    This class updates the ``http_session`` object of a Presto client to enable
+    TLS client certificate authentication.
+
+    """
+    def __init__(
+        self,
+        cert_path,  # type: Text
+        key_path,  #type : Text
+        ca_bundle=None,  # type: Optional[Text]
+    ):
+        # type: (...) -> None
+        self._cert_path = cert_path
+        self._key_path = key_path
+        self._ca_bundle = ca_bundle
+
+    def set_client_session(self, client_session):
+        pass
+
+    def set_http_session(self, http_session):
+        http_session.cert = (self._cert_path, self._key_path)
+        if self._ca_bundle:
+            http_session.verify = self._ca_bundle
+        return http_session
+
+    def setup(self, client):
+        self.set_client_session(client.client_session)
+        self.set_http_session(client.http_session)
